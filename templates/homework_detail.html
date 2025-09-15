@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-md-8">
+    <div class="card mb-3 p-3">
+      <h3>{{ hw.title }} <small class="text-muted">({{ hw.subject }})</small></h3>
+      <p>{{ hw.description }}</p>
+      <p><strong>Due:</strong> {{ hw.due_date.strftime('%Y-%m-%d %H:%M') }}</p>
+
+      <h5>Resources</h5>
+      <ul>
+        {% for r in hw.resources %}
+        <li><a href="{{ r.url }}" target="_blank">{{ r.title or r.url }}</a></li>
+        {% else %}
+        <li>No resources yet.</li>
+        {% endfor %}
+      </ul>
+
+      <form action="{{ url_for('add_resource', hw_id=hw.id) }}" method="post" class="row g-2">
+        <div class="col-md-5"><input name="title" class="form-control" placeholder="Resource title (optional)"></div>
+        <div class="col-md-5"><input name="url" class="form-control" placeholder="https://..."></div>
+        <div class="col-md-2"><button class="btn btn-sm btn-outline-success">Add</button></div>
+      </form>
+
+      <hr/>
+      <h5>Submit Homework</h5>
+      <form action="{{ url_for('submit_homework', hw_id=hw.id) }}" method="post">
+        <div class="mb-2">
+          <input name="student_name" class="form-control" placeholder="Your name (for demo)">
+        </div>
+        <div class="mb-2">
+          <textarea name="content" class="form-control" rows="4" placeholder="Write your answer or notes"></textarea>
+        </div>
+        <button class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+
+    <div class="card p-3">
+      <h5>Discussion / Peer Help</h5>
+      <ul class="list-group mb-3">
+        {% for t in hw.threads %}
+        <li class="list-group-item">
+          <strong>{{ t.author }}</strong> <span class="text-muted small">— {{ t.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+          <div>{{ t.message }}</div>
+        </li>
+        {% else %}
+        <li class="list-group-item">No comments yet.</li>
+        {% endfor %}
+      </ul>
+      <form method="post">
+        <div class="mb-2"><input name="author" class="form-control" placeholder="Your name"></div>
+        <div class="mb-2"><textarea name="message" class="form-control" rows="3" placeholder="Ask a question or add a comment"></textarea></div>
+        <button class="btn btn-outline-primary">Post</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card p-3">
+      <h5>Submissions</h5>
+      <ul class="list-group">
+        {% for sub in submissions %}
+        <li class="list-group-item">
+          <strong>{{ sub.student.name }}</strong>
+          <div class="small text-muted">Submitted: {{ sub.submitted_at.strftime('%Y-%m-%d %H:%M') }}</div>
+          <div>{{ sub.content[:180] }}{% if sub.content|length > 180 %}...{% endif %}</div>
+          {% if sub.grade is not none %}
+            <div class="badge bg-success mt-1">Grade: {{ sub.grade }}</div>
+          {% endif %}
+        </li>
+        {% else %}
+        <li class="list-group-item">No submissions yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

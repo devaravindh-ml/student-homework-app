@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Progress Dashboard</h1>
+
+<div class="row">
+  <div class="col-md-4">
+    <div class="card p-3 mb-3">
+      <h5>Summary</h5>
+      <p>Total assignments: <strong>{{ total }}</strong></p>
+      <p>Pending (due): <strong>{{ pending }}</strong></p>
+      <p>Distinct submitted homeworks: <strong>{{ completed }}</strong></p>
+      <p>Average grade: <strong>{{ avg_grade if avg_grade is not none else 'N/A' }}</strong></p>
+    </div>
+
+    <div class="card p-3">
+      <h5>Per subject progress</h5>
+      <ul class="list-group">
+        {% for subj, stats in subjects.items() %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {{ subj }}
+          <span>{{ stats.submitted }}/{{ stats.total }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <div class="card p-3">
+      <h5>Visuals (simple)</h5>
+      <p>This area is a placeholder for graphs (pie/line) using Chart.js or similar. You can add charts that show improvements.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
