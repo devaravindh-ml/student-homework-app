@@ -1,3 +1,3 @@
-from app import create_app  # assuming your main app file is app.py
+from app import create_app  # app.py contains create_app()
 
 app = create_app()
