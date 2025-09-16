@@ -9,7 +9,6 @@ import os
 BASE_DIR = os.path.dirname(__file__)
 DB_PATH = os.path.join(BASE_DIR, "app.db")
 
-
 def create_app():
     app = Flask(__name__)
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
@@ -22,8 +21,8 @@ def create_app():
         db.create_all()
 
     register_routes(app)
-    return app
 
+    return app
 
 # -------------------------------
 # Routes
@@ -31,7 +30,6 @@ def create_app():
 def register_routes(app):
     @app.route("/")
     def index():
-        """Homepage → upcoming assignments"""
         now = datetime.utcnow()
         upcoming = (
             Homework.query.filter(Homework.due_date >= now)
@@ -41,16 +39,12 @@ def register_routes(app):
         )
         return render_template("index.html", upcoming=upcoming)
 
-    # -------------------------------
-    # Calendar
-    # -------------------------------
     @app.route("/calendar")
     def calendar_view():
         return render_template("calendar.html")
 
     @app.route("/api/homeworks")
     def api_homeworks():
-        """Return homework events formatted for FullCalendar"""
         homeworks = Homework.query.all()
         events = [
             {
@@ -64,9 +58,6 @@ def register_routes(app):
         ]
         return jsonify(events)
 
-    # -------------------------------
-    # Homework CRUD
-    # -------------------------------
     @app.route("/homework/create", methods=["GET", "POST"])
     def create_homework():
         if request.method == "POST":
@@ -94,7 +85,6 @@ def register_routes(app):
     def homework_detail(hw_id):
         hw = Homework.query.get_or_404(hw_id)
 
-        # Post a thread message
         if request.method == "POST":
             author = request.form.get("author") or "Anonymous"
             message = request.form.get("message", "").strip()
@@ -144,12 +134,8 @@ def register_routes(app):
         flash("✅ Submitted successfully", "success")
         return redirect(url_for("homework_detail", hw_id=hw_id))
 
-    # -------------------------------
-    # Dashboard
-    # -------------------------------
     @app.route("/dashboard")
     def dashboard():
-        """Simple progress metrics"""
         total = Homework.query.count()
         now = datetime.utcnow()
         pending = Homework.query.filter(Homework.due_date >= now).count()
@@ -176,12 +162,8 @@ def register_routes(app):
             subjects=subjects,
         )
 
-    # -------------------------------
-    # Dev seed route
-    # -------------------------------
     @app.route("/_seed")
     def seed():
-        """Create sample data for testing (dev only)"""
         if Homework.query.count() > 0:
             return "Already seeded"
 
@@ -210,7 +192,6 @@ def register_routes(app):
         db.session.add_all([hw1, hw2, hw3])
         db.session.commit()
 
-        # Add sample resource & thread
         r = Resource(
             homework=hw1,
             title="Video explanation",
@@ -222,10 +203,13 @@ def register_routes(app):
 
         return "✅ Seeded sample data"
 
+# -------------------------------
+# Expose app for Gunicorn
+# -------------------------------
+app = create_app()
 
 # -------------------------------
 # Run app
 # -------------------------------
 if __name__ == "__main__":
-    app = create_app()
     app.run(debug=True)
